@@ -20,9 +20,9 @@ def main():
         print(f"  {path}")
 
     print(f"\n共 {len(to_delete)} 个文件。")
-    confirm = input("\n确认删除？输入 yes 确认，其他任意键取消：")
+    confirm = input("\n确认删除？输入 y 确认，其他任意键取消：")
 
-    if confirm.strip().lower() == 'yes':
+    if confirm.strip().lower() == 'y':
         for path in to_delete:
             os.remove(path)
             print(f"已删除: {path}")

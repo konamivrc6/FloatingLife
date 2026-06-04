@@ -83,7 +83,11 @@ def process_file(filepath):
                         continue
                 if no_cross_newline and is_open:
                     next_pos = text.find(marker, i + marker_len)
-                    if next_pos != -1 and '\n' in text[i + marker_len:next_pos]:
+                    if next_pos == -1:
+                        result.append(marker)
+                        i += marker_len
+                        continue
+                    if '\n' in text[i + marker_len:next_pos]:
                         result.append(marker)
                         i += marker_len
                         result.append(text[i:next_pos + marker_len])
