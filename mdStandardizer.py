@@ -45,54 +45,6 @@ def replace_dashes_outside_codeblocks(content):
     return ''.join(result_parts)
 
 
-def _find_prev_newline(text, pos):
-    """返回 pos 之前最近一个 \n 的位置，若不存在返回 -1。"""
-    return text.rfind('\n', 0, pos)
-
-
-def _find_next_newline(text, pos):
-    """返回 pos 之后最近一个 \n 的位置，若不存在返回 -1。"""
-    return text.find('\n', pos + 1)
-
-
-def _is_table_newline(text, pos):
-    """判断 pos 处的 \n 是否位于 markdown 表格行内。
-    条件：该 \n 到上一个 \n 之间含 |，且该 \n 到下一个 \n 之间也含 |。"""
-    prev_nl = _find_prev_newline(text, pos)
-    next_nl = _find_next_newline(text, pos)
-
-    if prev_nl == -1 or next_nl == -1:
-        return False
-
-    prev_segment = text[prev_nl + 1 : pos]
-    next_segment = text[pos + 1 : next_nl]
-
-    return '|' in prev_segment and '|' in next_segment
-
-
-def _replace_newlines_skipping_tables(text):
-    """将文本中每个 \n 替换为 \n\n，但跳过位于表格行内的 \n。"""
-    result = []
-    for i, ch in enumerate(text):
-        if ch == '\n' and not _is_table_newline(text, i):
-            result.append('\n\n')
-        else:
-            result.append(ch)
-    return ''.join(result)
-
-
-def replace_newline_outside_codeblocks_and_tables(content):
-    """仅在代码块和表格外部将 \n 替换为 \n\n。"""
-    parts = re.split(r'(```[\s\S]*?```)', content)
-    result_parts = []
-    for i, part in enumerate(parts):
-        if i % 2 == 0:
-            result_parts.append(_replace_newlines_skipping_tables(part))
-        else:
-            result_parts.append(part)
-    return ''.join(result_parts)
-
-
 def process_file(filepath):
     """处理单个 Markdown 文件：备份 → 标准化 → 写回。"""
     if not os.path.isfile(filepath):
@@ -131,7 +83,11 @@ def process_file(filepath):
                         continue
                 if no_cross_newline and is_open:
                     next_pos = text.find(marker, i + marker_len)
-                    if next_pos != -1 and '\n' in text[i + marker_len:next_pos]:
+                    if next_pos == -1:
+                        result.append(marker)
+                        i += marker_len
+                        continue
+                    if '\n' in text[i + marker_len:next_pos]:
                         result.append(marker)
                         i += marker_len
                         result.append(text[i:next_pos + marker_len])
@@ -196,10 +152,14 @@ def process_file(filepath):
     content = re.sub(r'\n +', '\n', content)
     while re.search(r'\n\n\n\n', content):
         content = re.sub(r'\n\n\n\n', '\n\n\n', content)
-    content = re.sub(r'\n\n\n', 'sdfuivgdfbduiofnbo', content)
+    content = re.sub(r'\n\n\n', 'THREE_NEWLINE_SOMETHING', content)
+
     content = replace_outside_codeblocks(content, r'\n\n', '\n')
-    content = replace_newline_outside_codeblocks_and_tables(content)
-    content = re.sub(r'sdfuivgdfbduiofnbo', '\n<br/>\n<br/>\n<br/>\n<br/>\n\n', content)
+    content = replace_outside_codeblocks(content, r'\|\n\|', 'TABLE_NEWLINE_SOMETHING')
+    content = replace_outside_codeblocks(content, r'\n', '\n\n')
+    content = content.replace('TABLE_NEWLINE_SOMETHING', '|\n|')
+
+    content = re.sub(r'THREE_NEWLINE_SOMETHING', '\n<br/>\n<br/>\n<br/>\n<br/>\n\n', content)
     content = process_paired_markers(content, '\n\n```\n\n', '\n\n```\n', '\n```\n\n')
 
     # 将修改后的内容写回原文件
