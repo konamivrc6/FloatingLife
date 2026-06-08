@@ -195,6 +195,9 @@ def main():
             if '_Original' in os.path.basename(filepath):
                 print(f"[{filepath}] 文件名包含 '_Original'，跳过。")
                 continue
+            if '_LLM' in os.path.basename(filepath):
+                print(f"[{filepath}] 文件名包含 '_LLM'，跳过。")
+                continue
             process_file(filepath)
 
     print("All files processed.")
