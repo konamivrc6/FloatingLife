@@ -143,9 +143,15 @@ def process_file(filepath):
     content = num_unit_re.sub(r'\1 \2\3', content)
 
     # 步骤5：处理斜体和加粗标记，在标记内部紧贴标记处插入零宽空格
+    content = content.replace('/*', "COMMENTS_PLACEHOLDER_START")
+    content = content.replace('*/', "COMMENTS_PLACEHOLDER_END")
     content = content.replace('**', "BOLD_PLACEHOLDER")
     content = process_paired_markers(content, '*', '*\u200B', '\u200B*', no_cross_newline=True)
     content = process_paired_markers(content, 'BOLD_PLACEHOLDER', '**\u200B', '\u200B**', no_cross_newline=True)
+
+    # 恢复占位符
+    content = content.replace('COMMENTS_PLACEHOLDER_START', '/*')
+    content = content.replace('COMMENTS_PLACEHOLDER_END', '*/')
 
     # 步骤6：处理空行标准化
     content = re.sub(r' +\n', '\n', content)
