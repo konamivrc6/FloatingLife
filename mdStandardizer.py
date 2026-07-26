@@ -165,7 +165,7 @@ def process_file(filepath):
     content = replace_outside_codeblocks(content, r'\n', '\n\n')
     content = content.replace('TABLE_NEWLINE_SOMETHING', '|\n|')
 
-    content = re.sub(r'LARGE_BLANK_SOMETHING', '\n<br/>\n<br/>\n<br/>\n<br/>\n\n', content)
+    content = re.sub(r'LARGE_BLANK_SOMETHING', '\n\n<br/>\n<br/>\n<br/>\n\n', content)
     content = process_paired_markers(content, '\n\n```\n\n', '\n\n```\n', '\n```\n\n')
     content = re.sub(r'(>[^\n]*)\n\n(>)', r'\1\n\2', content)
     content = content.replace('>\n\n>', '>\n>')
