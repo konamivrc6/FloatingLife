@@ -158,15 +158,17 @@ def process_file(filepath):
     content = re.sub(r'\n +', '\n', content)
     while re.search(r'\n\n\n\n', content):
         content = re.sub(r'\n\n\n\n', '\n\n\n', content)
-    content = re.sub(r'\n\n\n', 'THREE_NEWLINE_SOMETHING', content)
+    content = re.sub(r'\n\n\n', 'LARGE_BLANK_SOMETHING', content)
 
     content = replace_outside_codeblocks(content, r'\n\n', '\n')
     content = replace_outside_codeblocks(content, r'\|\n\|', 'TABLE_NEWLINE_SOMETHING')
     content = replace_outside_codeblocks(content, r'\n', '\n\n')
     content = content.replace('TABLE_NEWLINE_SOMETHING', '|\n|')
 
-    content = re.sub(r'THREE_NEWLINE_SOMETHING', '\n<br/>\n<br/>\n<br/>\n<br/>\n\n', content)
+    content = re.sub(r'LARGE_BLANK_SOMETHING', '\n<br/>\n<br/>\n<br/>\n<br/>\n\n', content)
     content = process_paired_markers(content, '\n\n```\n\n', '\n\n```\n', '\n```\n\n')
+    content = re.sub(r'(>[^\n]*)\n\n(>)', r'\1\n\2', content)
+    content = content.replace('>\n\n>', '>\n>')
 
     # 将修改后的内容写回原文件
     with open(filepath, 'w', encoding='utf-8', newline='') as f:
