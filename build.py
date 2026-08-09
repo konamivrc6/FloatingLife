@@ -203,7 +203,7 @@ nav .sep{color:var(--muted)}
 .home-fonts .font-btn:hover{color:var(--accent)}
 .home-fonts .font-btn.active{color:var(--accent);font-weight:600}
 
-@media(max-width:600px){html{font-size:16px}main{padding:2rem 1rem}.home-title{font-size:3.2rem}.home-nav{gap:2rem}.chapter-nav{flex-direction:column;align-items:center;gap:.5rem}}
+@media(max-width:600px){html{font-size:16px}main{padding:2rem 1rem}.home-title{font-size:3.2rem}.home-nav{gap:2rem}.chapter-nav{gap:.5rem}}
 @media(min-width:768px){
   #side-rail{display:flex}
   .top-bar,.home-fonts{display:none}
@@ -419,6 +419,13 @@ def _top_bar(nav):
 
 # ── Markdown → HTML ─────────────────────────────────────────
 
+def strip_comments(text):
+    """删除 C 风格注释 /* ... */（跨行也支持），顺便吃掉紧邻注释的单空格"""
+    text = text.replace(' /*', '/*')
+    text = text.replace('*/ ', '*/')
+    return re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+
+
 def md_to_html(text):
     return md_lib.markdown(text, extensions=['fenced_code', 'codehilite', 'tables'])
 
@@ -447,11 +454,12 @@ def parse_chapters():
             # 去掉标题行得到正文
             body_lines = part.split('\n', 1)
             body = body_lines[1] if len(body_lines) > 1 else ''
+            body = strip_comments(body.strip())
             chapters.append({
                 'num': ch_num,
                 'title': ch_title,
-                'body': body.strip(),
-                'html': md_to_html(body.strip()),
+                'body': body,
+                'html': md_to_html(body),
             })
         else:
             # 可能是 preamble（# 浮生 等）
@@ -667,6 +675,7 @@ def build():
         # 去掉首行 # 标题（页面用 h2 显示）
         lines = raw.split('\n', 1)
         content = lines[1].strip() if len(lines) > 1 else raw
+        content = strip_comments(content)
         html = md_to_html(content)
         body = f'<h2>{s["title"]}</h2>\n<div class="chapter-content">\n{html}\n</div>'
         write_page(f'setting/{s["slug"]}.html', s['title'], body, base='../',
