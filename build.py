@@ -8,6 +8,8 @@ import re
 import shutil
 from pathlib import Path
 
+import markdown as md_lib
+
 BASE = Path(__file__).resolve().parent
 NOVEL = BASE / "浮生 · 满梧.md"
 SETTINGS_DIR = BASE / "[WLD] Worldbuilding Bureau"
@@ -389,8 +391,6 @@ THEME_JS = """(function() {
   }
 })();"""
 
-HOME_NAV = ""
-
 CHAPTER_NAV_TPL = """<nav><a href="../chapters.html">← 目录</a><span class="sep">|</span><a href="../index.html">首页</a></nav>"""
 
 SETTING_NAV_TPL = """<nav><a href="../settings.html">← 设定</a><span class="sep">|</span><a href="../index.html">首页</a></nav>"""
@@ -418,8 +418,6 @@ def _top_bar(nav):
     return f'<div class="top-bar">{nav}{FONT_ROW}</div>'
 
 # ── Markdown → HTML ─────────────────────────────────────────
-
-import markdown as md_lib
 
 def md_to_html(text):
     return md_lib.markdown(text, extensions=['fenced_code', 'codehilite', 'tables'])
