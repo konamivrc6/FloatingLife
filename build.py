@@ -8,6 +8,8 @@ import re
 import shutil
 from pathlib import Path
 
+import markdown as md_lib
+
 BASE = Path(__file__).resolve().parent
 NOVEL = BASE / "浮生 · 满梧.md"
 SETTINGS_DIR = BASE / "[WLD] Worldbuilding Bureau"
@@ -128,7 +130,7 @@ nav .sep{color:var(--muted)}
 .footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2.5rem 0;margin-top:3rem}
 .footer p{margin:0}
 .chapter-content h2{margin-top:0}
-.chapter-nav{display:flex;justify-content:space-between;margin:3rem 0 1rem;padding-top:2rem;border-top:1px solid var(--border)}
+.chapter-nav{display:flex;justify-content:space-between;margin:3rem 0 6rem;padding-top:2rem;border-top:1px solid var(--border)}
 .chapter-nav a{font-size:1rem;color:var(--chroma);transition:color .2s}
 .chapter-nav a:hover{color:var(--accent);text-decoration:none}
 /* ── 首页：居中极简 ── */
@@ -201,7 +203,7 @@ nav .sep{color:var(--muted)}
 .home-fonts .font-btn:hover{color:var(--accent)}
 .home-fonts .font-btn.active{color:var(--accent);font-weight:600}
 
-@media(max-width:600px){html{font-size:16px}main{padding:2rem 1rem}.home-title{font-size:3.2rem}.home-nav{gap:2rem}.chapter-nav{flex-direction:column;align-items:center;gap:.5rem}}
+@media(max-width:600px){html{font-size:16px}main{padding:2rem 1rem}.home-title{font-size:3.2rem}.home-nav{gap:2rem}.chapter-nav{gap:.5rem}}
 @media(min-width:768px){
   #side-rail{display:flex}
   .top-bar,.home-fonts{display:none}
@@ -389,8 +391,6 @@ THEME_JS = """(function() {
   }
 })();"""
 
-HOME_NAV = ""
-
 CHAPTER_NAV_TPL = """<nav><a href="../chapters.html">← 目录</a><span class="sep">|</span><a href="../index.html">首页</a></nav>"""
 
 SETTING_NAV_TPL = """<nav><a href="../settings.html">← 设定</a><span class="sep">|</span><a href="../index.html">首页</a></nav>"""
@@ -419,7 +419,12 @@ def _top_bar(nav):
 
 # ── Markdown → HTML ─────────────────────────────────────────
 
-import markdown as md_lib
+def strip_comments(text):
+    """删除 C 风格注释 /* ... */（跨行也支持），顺便吃掉紧邻注释的单空格"""
+    text = text.replace(' /*', '/*')
+    text = text.replace('*/ ', '*/')
+    return re.sub(r'/\*.*?\*/', '', text, flags=re.DOTALL)
+
 
 def md_to_html(text):
     return md_lib.markdown(text, extensions=['fenced_code', 'codehilite', 'tables'])
@@ -449,11 +454,12 @@ def parse_chapters():
             # 去掉标题行得到正文
             body_lines = part.split('\n', 1)
             body = body_lines[1] if len(body_lines) > 1 else ''
+            body = strip_comments(body.strip())
             chapters.append({
                 'num': ch_num,
                 'title': ch_title,
-                'body': body.strip(),
-                'html': md_to_html(body.strip()),
+                'body': body,
+                'html': md_to_html(body),
             })
         else:
             # 可能是 preamble（# 浮生 等）
@@ -669,6 +675,7 @@ def build():
         # 去掉首行 # 标题（页面用 h2 显示）
         lines = raw.split('\n', 1)
         content = lines[1].strip() if len(lines) > 1 else raw
+        content = strip_comments(content)
         html = md_to_html(content)
         body = f'<h2>{s["title"]}</h2>\n<div class="chapter-content">\n{html}\n</div>'
         write_page(f'setting/{s["slug"]}.html', s['title'], body, base='../',
