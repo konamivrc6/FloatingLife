@@ -101,8 +101,10 @@ def process_file(filepath):
                 i += 1
         return ''.join(result)
 
-    # 步骤0：删除所有 <br/>、\r 和零宽空格
+    # 步骤0：删除所有 <br/>、\r 和零宽空格，保护特殊格式标记
     content = re.sub(r'<br/>|\r|\u200B', '', content)
+    content = content.replace('<span style="text-emphasis: dot; text-emphasis-position: under;">', "DOT_START_PLACEHOLDER")
+    content = content.replace('</span>', "DOT_END_PLACEHOLDER")
 
     # 步骤1：连续6个半角句号 → 全角省略号，连续4个及以上连字符 → 全角破折号（跳过表格分隔线）
     content = replace_outside_codeblocks(content, re.escape('......'), '……')
@@ -149,10 +151,6 @@ def process_file(filepath):
     content = process_paired_markers(content, '*', '*\u200B', '\u200B*', no_cross_newline=True)
     content = process_paired_markers(content, 'BOLD_PLACEHOLDER', '**\u200B', '\u200B**', no_cross_newline=True)
 
-    # 恢复占位符
-    content = content.replace('COMMENTS_PLACEHOLDER_START', '/*')
-    content = content.replace('COMMENTS_PLACEHOLDER_END', '*/')
-
     # 步骤6：对下划线转义
     content = content.replace('\\_', '_')
     content = re.sub(r'(?<!_)_(?!_)', 'SINGLE-UNDERSCORE-PLACEHOLDER', content)
@@ -175,6 +173,18 @@ def process_file(filepath):
     content = process_paired_markers(content, '\n\n```\n\n', '\n\n```\n', '\n```\n\n')
     content = re.sub(r'(>[^\n]*)\n\n(>)', r'\1\n\2', content)
     content = content.replace('>\n\n>', '>\n>')
+
+    # 步骤8：恢复占位符
+    content = content.replace('COMMENTS_PLACEHOLDER_START', '/*')
+    content = content.replace('COMMENTS_PLACEHOLDER_END', '*/')
+    content = content.replace(' DOT_START_PLACEHOLDER ', '<span style="text-emphasis: dot; text-emphasis-position: under;">')
+    content = content.replace(' DOT_END_PLACEHOLDER ', '</span>')
+    content = content.replace('DOT_START_PLACEHOLDER ', '<span style="text-emphasis: dot; text-emphasis-position: under;">')
+    content = content.replace('DOT_END_PLACEHOLDER ', '</span>')
+    content = content.replace(' DOT_START_PLACEHOLDER', '<span style="text-emphasis: dot; text-emphasis-position: under;">')
+    content = content.replace(' DOT_END_PLACEHOLDER', '</span>')
+    content = content.replace('DOT_START_PLACEHOLDER', '<span style="text-emphasis: dot; text-emphasis-position: under;">')
+    content = content.replace('DOT_END_PLACEHOLDER', '</span>')
 
     # 将修改后的内容写回原文件
     with open(filepath, 'w', encoding='utf-8', newline='') as f:
@@ -208,6 +218,9 @@ def main():
         for filepath in sys.argv[1:]:
             if '_Original' in os.path.basename(filepath):
                 print(f"[{filepath}] 文件名包含 '_Original'，跳过。")
+                continue
+            if 'Clipboard' in os.path.basename(filepath):
+                print(f"[{filepath}] 文件名包含 'Clipboard'，跳过。")
                 continue
             if '_LLM' in os.path.basename(filepath):
                 print(f"[{filepath}] 文件名包含 '_LLM'，跳过。")
