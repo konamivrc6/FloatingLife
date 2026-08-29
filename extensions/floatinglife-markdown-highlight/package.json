@@ -1,0 +1,34 @@
+{
+  "name": "floatinglife-markdown-highlight",
+  "displayName": "浮生 Markdown 高亮",
+  "description": "《浮生》小说的 Markdown 高亮：/* */ 注释与中文引号、书名号。",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./main.js",
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "浮生 Markdown 高亮",
+      "properties": {
+        "floatinglifeHighlight.blockCommentColor": {
+          "type": "string",
+          "default": "#4caf50",
+          "description": "/* */ 块注释的颜色"
+        },
+        "floatinglifeHighlight.quoteColor": {
+          "type": "string",
+          "default": "#DA893B",
+          "description": "中文引号（“ ” 「 」）与书名号（《 》）的颜色"
+        }
+      }
+    }
+  }
+}
