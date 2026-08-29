@@ -4,6 +4,8 @@ import time
 import shutil
 import os
 
+import _lib.toolignore as toolignore
+
 def replace_outside_codeblocks(content, pattern, replacement):
     """仅在fenced代码块(```...```)外部执行正则替换。"""
     parts = re.split(r'(```[\s\S]*?```)', content)
@@ -204,7 +206,7 @@ def main():
         md_files = []
         for root, dirs, files in os.walk('.'):
             for f in files:
-                if f.endswith('.md') and '_Original' not in f:
+                if f.endswith('.md') and not toolignore.is_ignored(f):
                     md_files.append(os.path.join(root, f))
 
         if not md_files:
@@ -216,14 +218,8 @@ def main():
             process_file(filepath)
     else:
         for filepath in sys.argv[1:]:
-            if '_Original' in os.path.basename(filepath):
-                print(f"[{filepath}] 文件名包含 '_Original'，跳过。")
-                continue
-            if 'Clipboard' in os.path.basename(filepath):
-                print(f"[{filepath}] 文件名包含 'Clipboard'，跳过。")
-                continue
-            if '_LLM' in os.path.basename(filepath):
-                print(f"[{filepath}] 文件名包含 '_LLM'，跳过。")
+            if toolignore.is_ignored(os.path.basename(filepath)):
+                print(f"[{filepath}] 命中忽略规则，跳过。")
                 continue
             process_file(filepath)
 

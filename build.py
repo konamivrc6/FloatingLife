@@ -10,6 +10,8 @@ from pathlib import Path
 
 import markdown as md_lib
 
+import _lib.toolignore as toolignore
+
 BASE = Path(__file__).resolve().parent
 NOVEL = BASE / "浮生 · 满梧.md"
 SETTINGS_DIR = BASE / "[WLD] Worldbuilding Bureau"
@@ -478,6 +480,8 @@ def parse_settings():
     """列出 [WLD] Worldbuilding Bureau/ 下所有 .md 文件"""
     files = []
     for p in sorted(SETTINGS_DIR.glob('*.md')):
+        if toolignore.is_ignored(p.name):
+            continue
         m = re.match(r'^(\d+)\s+(.+?)\.md$', p.name)
         if m:
             files.append({

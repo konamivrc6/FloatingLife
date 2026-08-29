@@ -2,3 +2,5 @@
 temp*
 *_LLM.md
 docs/
+__pycache__/
+*.pyc

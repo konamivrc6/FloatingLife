@@ -1,0 +1,5 @@
+# 工具脚本统一忽略的文件名模式（glob，一行一个；# 开头为注释）
+*_Original*
+*_LLM*
+*Clipboard*
+temp*
