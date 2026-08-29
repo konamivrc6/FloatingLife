@@ -119,6 +119,7 @@ def main():
     if not files:
         print("未指定文件。")
         print('用法：python _tool_fix_chapters.py "浮生 · 满梧.md" [更多文件...]')
+        time.sleep(0.5)
         sys.exit(1)
 
     for filepath in files:
