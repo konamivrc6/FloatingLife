@@ -4,7 +4,8 @@
 检测以 `## ` 开头的章节标题，按出现顺序重排为连续序号；
 先打印报告，经用户输入 y 确认后，再备份并写回。
 
-起始序号规则：第一个章节标题若有数字序号，则沿用该序号作起点；否则从 0 开始。
+分节规则：每个 `# ` 标题视作分节符，会打断章节序列；每个分节内的章节独立编号。
+分节内起始序号规则：该分节第一个章节标题若有数字序号，则沿用该序号作起点；否则从 0 开始。
 换行符（CRLF / LF）原样保留，不做转换。
 
 用法：
@@ -20,12 +21,14 @@ import _lib.toolignore as toolignore
 
 
 def parse_headers(lines):
-    """逐行识别章节标题（列 0 的 '## '），跳过 fenced 代码块内部。
+    """逐行识别章节标题（列 0 的 '## '）与分节标题（列 0 的 '# '），跳过 fenced 代码块内部。
 
-    返回 headers 列表，每项为 dict：
-        {idx: 行索引, old: 原序号(int) 或 None, title: 标题文字}
+    返回 (headers, h1s)：
+        headers 列表，每项为 dict：{idx, old, title}
+        h1s 列表，每项为 dict：{idx, title}
     """
     headers = []
+    h1s = []
     in_codeblock = False
     for idx, raw in enumerate(lines):
         s = raw.rstrip('\r\n')
@@ -34,16 +37,19 @@ def parse_headers(lines):
             continue
         if in_codeblock:
             continue
-        if not s.startswith('## '):
-            continue
-        m = re.match(r'^## (\d+) (.*)$', s)
-        if m:
-            headers.append({'idx': idx, 'old': int(m.group(1)), 'title': m.group(2)})
-        else:
-            rest = s[3:].strip()
-            if rest and not rest.startswith('#'):
-                headers.append({'idx': idx, 'old': None, 'title': rest})
-    return headers
+        if s.startswith('## '):
+            m = re.match(r'^## (\d+) (.*)$', s)
+            if m:
+                headers.append({'idx': idx, 'old': int(m.group(1)), 'title': m.group(2)})
+            else:
+                rest = s[3:].strip()
+                if rest and not rest.startswith('#'):
+                    headers.append({'idx': idx, 'old': None, 'title': rest})
+        elif s.startswith('# '):
+            title = s[2:].strip()
+            if title:
+                h1s.append({'idx': idx, 'title': title})
+    return headers, h1s
 
 
 def process_file(filepath):
@@ -56,24 +62,37 @@ def process_file(filepath):
         content = f.read()
 
     lines = content.splitlines(keepends=True)
-    headers = parse_headers(lines)
+    headers, h1s = parse_headers(lines)
 
     if not headers:
         print(f"[{filepath}] 未检测到章节标题，跳过。")
         return
 
-    start = headers[0]['old'] if headers[0]['old'] is not None else 0
-
-    for i, h in enumerate(headers):
-        h['new'] = start + i
+    # 分节编号：每个 # 标题视作分节符，打断章节序列；分节内重新编号。
+    current_section = -1
+    for h in headers:
+        sec = sum(1 for x in h1s if x['idx'] < h['idx'])
+        if sec != current_section:
+            current_section = sec
+            start = h['old'] if h['old'] is not None else 0
+        h['new'] = start
+        start += 1
 
     changed = [h for h in headers if h['old'] != h['new']]
     if not changed:
-        print(f"[{filepath}] 检测到 {len(headers)} 个章节标题（起始序号 {start}），序号已连续，无需修改。")
+        print(f"[{filepath}] 检测到 {len(headers)} 个章节标题、{len(h1s)} 个分节，序号已连续，无需修改。")
         return
 
-    print(f"\n[{filepath}] 检测到 {len(headers)} 个章节标题，起始序号 {start}：\n")
+    print(f"\n[{filepath}] 检测到 {len(headers)} 个章节标题、{len(h1s)} 个分节：\n")
+    current_section = -1
     for h in headers:
+        sec = sum(1 for x in h1s if x['idx'] < h['idx'])
+        if sec != current_section:
+            current_section = sec
+            if current_section >= 1:
+                print(f"  ── # {h1s[current_section - 1]['title']} ──")
+            else:
+                print("  ──（正文起始分节）──")
         old_disp = str(h['old']) if h['old'] is not None else '（无）'
         if h['old'] is None:
             kind = '补号'
