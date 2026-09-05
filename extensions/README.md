@@ -13,7 +13,7 @@ python extensions/pack_vsix.py <扩展文件夹名> [<扩展文件夹名> ...]
 
 ## floatinglife-markdown-highlight
 
-给 Markdown 上色：`/* */` 注释（绿）、中文引号 `“ ”`/`「 」`、书名号 `《 》`（橙）。
+给 Markdown 上色：`/* */` 注释（绿）、中文引号 `“ ”`/`「 」`、书名号 `《 》`（橙），以及 `###` 标题标签——时间标签 `timeX` 黄、`丢弃` 红、`完成` 绿、其他标签与 `_` 灰。
 
 ### 核心架构：用装饰（decoration），不要用语法注入
 
@@ -29,9 +29,10 @@ python extensions/pack_vsix.py <扩展文件夹名> [<扩展文件夹名> ...]
 最终方案：**JS 装饰**。扩展靠 `activationEvents: ["onLanguage:markdown"]` 激活后，用正则扫描文档，对匹配范围调 `createTextEditorDecorationType` 直接染色。这不经过语法层，确定性生效（参考 `floatinglife-markdown-highlight/main.js`）。
 
 要点：
-- `RULES` 数组描述高亮规则，每条含 `configKey`（配置键）、`defaultColor`、`regex`（带 `/g`）、`select(m)`（返回要染色的 `[起始偏移, 结束偏移]`）。
+- `RULES` 数组描述高亮规则，每条含 `configKey`（配置键）、`defaultColor`、`regex`（带 `/g`）、`select(m)`（返回**若干 `[起始偏移, 结束偏移]` 组成的数组**，可为空）。
 - 颜色走 `contributes.configuration`，用户可在设置里改。
-- 「只染中间内容」用 `select: (m) => [m.index + 1, m.index + m[0].length - 1]`（前后标点各 1 字符）；「整段染色」用 `[m.index, m.index + m[0].length]`。
+- 整段染色返回单元素数组，如 `select: (m) => [[m.index, m.index + m[0].length]]`；多段（如一条正则要把不同子串拆到不同颜色桶）返回多元素数组。
+- 同一 `select` 内不允许区间重叠——不同颜色分给不同 rule，让 rule 的正则各自只匹配自己那份子串即可。
 
 ### 加一条新规则
 
@@ -42,9 +43,15 @@ python extensions/pack_vsix.py <扩展文件夹名> [<扩展文件夹名> ...]
   configKey: 'xxxColor',
   defaultColor: '#RRGGBB',
   regex: /你的正则/g,
-  select: (m) => [m.index, m.index + m[0].length],
+  select: (m) => [[m.index, m.index + m[0].length]],
 }
 ```
+
+`###` 标题标签的高亮（`main.js` 里 `timeTagColor` 等 4 条）做法：用
+`/^### .*?(_[^\n]*)$/gm` 只匹配「从第一个 `_` 起的标签区」为捕获组 1（标题文字不含 `_`，
+故首个 `_` 之前全是标题），再用 `tagPairs(m, kind)` 把该区段拆成 token，按时间/丢弃/完成/其他
+分类返回各 `[s,e]` 区间。`_` 与「杂项标签」归 `other`，时间标签复用
+`/^time-?\d+(?:\.\d+)?$/`（与 `_tool_fix_chapters.py` 的 `timeX` 规则一致，含小数/负数）。
 
 「只有前引号、没有后引号就不高亮」这类需求，靠正则本身保证——写成 `前标[^后标]+后标`，天然要求成对出现。
 
