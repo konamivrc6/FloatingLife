@@ -10,7 +10,7 @@
 
 ### 标题标签（仅文件名含 `_toWrite` 时启用）：
 `### 标题_标签1_标签2`。特殊标签两类：
-- 时间标签 `time0`、`time1`… 排在一行最前（一个标题可有多个，排序以最大值为准）；
+- 时间标签 `time0`、`time0.5`、`time-1`… 排在一行最前（一个标题可有多个，排序以最大值为准）；
 - 状态标签（`丢弃`、`完成`，可扩展）排在末尾。
 
 除规范化标签位置外，还会对 `###` 文块排序：无状态 → 丢弃 → 完成；
@@ -30,7 +30,7 @@ import _lib.toolignore as toolignore
 
 # —— ### 标题标签（仅文件名含 _toWrite 时启用）——
 STATUS_TAGS = ['丢弃', '完成']         # 有序状态标签，可追加
-TIME_RE = re.compile(r'^time\d+$')     # time0, time1, ...（非负整数）
+TIME_RE = re.compile(r'^time-?\d+(?:\.\d+)?$')     # time0, time0.5, time-1, time1.25, ...（有理数，小数写法，含负数）
 
 
 def parse_headers(lines):
@@ -84,8 +84,8 @@ def status_of(tags):
 
 
 def time_of(tags):
-    """返回时间标签的最大数值（int）；无则 None。"""
-    vals = [int(t[4:]) for t in tags if TIME_RE.match(t)]
+    """返回时间标签的最大数值（float）；无则 None。"""
+    vals = [float(t[4:]) for t in tags if TIME_RE.match(t)]
     return max(vals) if vals else None
 
 
@@ -96,7 +96,7 @@ def normalize_h3_heading(line):
     title, tags = parse_h3_heading(line)
     if not tags:
         return line
-    times = sorted((t for t in tags if TIME_RE.match(t)), key=lambda t: int(t[4:]))
+    times = sorted((t for t in tags if TIME_RE.match(t)), key=lambda t: float(t[4:]))
     statuses = sorted((t for t in tags if t in STATUS_TAGS), key=STATUS_TAGS.index)
     others = [t for t in tags if not TIME_RE.match(t) and t not in STATUS_TAGS]
     ordered = times + others + statuses
