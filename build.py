@@ -131,6 +131,7 @@ nav .sep{color:var(--muted)}
 .toc-num{flex-shrink:0;width:2.5rem;color:var(--muted);font-size:.9rem}
 .footer{text-align:center;color:var(--muted);font-size:.82rem;padding:2.5rem 0;margin-top:3rem}
 .footer p{margin:0}
+.chapter-content h1{color:var(--accent)}
 .chapter-content h2{margin-top:0}
 .chapter-nav{display:flex;justify-content:space-between;margin:3rem 0 6rem;padding-top:2rem;border-top:1px solid var(--border)}
 .chapter-nav a{font-size:1rem;color:var(--chroma);transition:color .2s}
@@ -684,12 +685,12 @@ def build():
     # 6. 各设定文档页
     for s in settings:
         raw = Path(s['path']).read_text(encoding='utf-8-sig').lstrip('﻿')
-        # 去掉首行 # 标题（页面用 h2 显示）
-        lines = raw.split('\n', 1)
-        content = lines[1].strip() if len(lines) > 1 else raw
-        content = strip_comments(content)
+        content = strip_comments(raw).strip()
         html = md_to_html(content)
-        body = f'<h2>{s["title"]}</h2>\n<div class="chapter-content">\n{html}\n</div>'
+        # 文档自带 # 标题时按原文位置渲染（9/10 号报告的标题在元信息下方），
+        # 不注入文件名标题以免重复；无 # 标题的非标准文档用文件名标题兜底。
+        heading = '' if re.search(r'^#\s', raw, flags=re.MULTILINE) else f'<h2>{s["title"]}</h2>\n'
+        body = f'{heading}<div class="chapter-content">\n{html}\n</div>'
         write_page(f'setting/{s["slug"]}.html', s['title'], body, base='../',
                    rail_head=_rail_head('../', 'settings.html'),
                    rail_tail=RAIL_TAIL_BTN,
