@@ -110,8 +110,7 @@ pre code{background:none;padding:0;font-size:.82rem;line-height:1.6;white-space:
 blockquote{border-left:3px solid var(--chroma);padding:.8rem 1.5rem;margin:1.2rem 0;color:var(--muted);font-style:normal;background:var(--chroma-bg);border-radius:0 6px 6px 0}
 ul,ol{margin:.5rem 0 1rem 1.5rem}
 li{margin:.3rem 0}
-hr{border:none;text-align:center;margin:2.5rem 0;overflow:visible}
-hr::after{content:'~  ~  ~';color:var(--chroma-dim);font-size:1rem;letter-spacing:.3em;font-family:serif}
+hr{border:none;height:.25em;background:var(--chroma-dim);border-radius:2px;margin:2.5rem 0}
 table{border-collapse:collapse;width:100%;margin:1.2rem 0;font-size:.95rem}
 th,td{border:1px solid var(--border);padding:.5rem .8rem;text-align:left}
 th{background:var(--hover);font-weight:600}
