@@ -1,8 +1,8 @@
 {
   "name": "floatinglife-markdown-highlight",
   "displayName": "浮生 Markdown 高亮",
-  "description": "《浮生》小说的 Markdown 高亮：/* */ 注释与中文引号、书名号。",
-  "version": "0.1.0",
+  "description": "《浮生》小说的 Markdown 高亮：/* */ 注释、中文引号/书名号与 ### 标题标签。",
+  "version": "0.2.0",
   "publisher": "local",
   "engines": {
     "vscode": "^1.70.0"
@@ -27,6 +27,26 @@
           "type": "string",
           "default": "#DA893B",
           "description": "中文引号（“ ” 「 」）与书名号（《 》）的颜色"
+        },
+        "floatinglifeHighlight.timeTagColor": {
+          "type": "string",
+          "default": "#E5C07B",
+          "description": "### 标题中时间标签（timeX）的颜色"
+        },
+        "floatinglifeHighlight.discardTagColor": {
+          "type": "string",
+          "default": "#E05561",
+          "description": "### 标题中状态标签（丢弃）的颜色"
+        },
+        "floatinglifeHighlight.doneTagColor": {
+          "type": "string",
+          "default": "#4CAF50",
+          "description": "### 标题中状态标签（完成）的颜色"
+        },
+        "floatinglifeHighlight.otherTagColor": {
+          "type": "string",
+          "default": "#808080",
+          "description": "### 标题中其他标签与分隔符 _ 的颜色"
         }
       }
     }

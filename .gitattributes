@@ -1,0 +1,8 @@
+# 统一文本文件换行符为 LF（优先级高于本机 core.autocrlf）
+* text=auto eol=lf
+
+# 二进制文件不参与换行转换
+*.docx  -text
+*.zip   -text
+*.vsix  -text
+*.woff2 -text
