@@ -78,6 +78,10 @@ const RULES = [
   },
 ];
 
+// 击键只重置计时器，停手 REFRESH_DEBOUNCE_MS 后才真正重扫一次。
+const REFRESH_DEBOUNCE_MS = 150;
+let pendingRefresh = null;
+
 function activate(context) {
   let activeEditor = vscode.window.activeTextEditor;
 
@@ -131,6 +135,16 @@ function activate(context) {
     }
   }
 
+  function scheduleRefresh() {
+    if (pendingRefresh) {
+      clearTimeout(pendingRefresh);
+    }
+    pendingRefresh = setTimeout(() => {
+      pendingRefresh = null;
+      refresh();
+    }, REFRESH_DEBOUNCE_MS);
+  }
+
   if (activeEditor) {
     refresh();
   }
@@ -142,7 +156,7 @@ function activate(context) {
     }),
     vscode.workspace.onDidChangeTextDocument((event) => {
       if (activeEditor && event.document === activeEditor.document) {
-        refresh();
+        scheduleRefresh();
       }
     }),
     vscode.workspace.onDidChangeConfiguration((event) => {
@@ -161,4 +175,9 @@ function activate(context) {
 }
 
 exports.activate = activate;
-exports.deactivate = () => {};
+exports.deactivate = () => {
+  if (pendingRefresh) {
+    clearTimeout(pendingRefresh);
+    pendingRefresh = null;
+  }
+};
