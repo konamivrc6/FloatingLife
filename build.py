@@ -599,6 +599,9 @@ def _home_sky_svg():
 
 
 def build():
+    # 清空旧站点，避免已删除章节/设定的 HTML 残留
+    if DOCS.exists():
+        shutil.rmtree(DOCS)
     DOCS.mkdir(exist_ok=True)
 
     # 写出共享的 CSS 和 JS 文件
