@@ -20,8 +20,8 @@ markdown-it 插件钩子，而 markdown-pdf.styles 是纯 CSS，无法对正则�
 时间标签正则与 _tool_fix_chapters.py 的 TIME_RE 一致（time0 / time0.5 / time-1 …）。
 
 区域内原文做 HTML 转义（& < >），免得注释里的尖括号被 markdown-it 当成标签吞掉；区域外一字
-不改——正文里有 <u>…</u>、<br/> 这类原生 HTML，必须原样留给 markdown-it。换行符（LF / CRLF）
-与 BOM 均原样保留，不做转换。
+不改——正文里有 <u>…</u>、<br/> 这类原生 HTML，必须原样留给 markdown-it。换行符统一为 LF
+（读取后删除所有 \r）；BOM 不保留（读取时以 utf-8-sig 剥离）。
 
 用法：
     python _tool_export_colored.py "浮生 · 满梧.md" ["浮生 · 满梧_toWrite.md" ...]
@@ -130,13 +130,14 @@ def wrap(text, spans):
 
 
 def process_file(filepath):
-    """处理单个文件：扫描 → 生成 temp_<名> 副本。原文件只读，不改动。"""
+    """处理单个文件：扫描 → 生成 <名>_colored 副本。原文件只读，不改动。"""
     if not os.path.isfile(filepath):
         print(f"Error: file '{filepath}' not found. Skipping.")
         return
 
     with open(filepath, 'r', encoding='utf-8-sig', newline='') as f:
         content = f.read()
+    content = content.replace('\r', '')   # 统一 LF
 
     spans = collect_spans(content)
     if not spans:

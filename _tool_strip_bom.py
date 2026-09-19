@@ -71,7 +71,6 @@ def main():
 
     # 用户确认
     print("\n⚠ 将永久删除以上文件开头的 UTF-8 BOM 字节（操作不可逆）。")
-    # 添加 flush 以保证提示信息在交互环境及时显示
     try:
         confirm = input("确认执行？(y/n): ").strip().lower()
     except (EOFError, KeyboardInterrupt):
