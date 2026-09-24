@@ -79,7 +79,7 @@ python build.py    # 无参数、无子命令；依赖 markdown 库；产出 doc
 | 脚本 | 作用 |
 |---|---|
 | `_tool_fix_chapters.py <文件...>` | 章节序号重排；文件名含 `_toWrite` 时额外做 `###` 标签规范化与排序 |
-| `_tool_fmt_md.py [文件...]` | 排版标准化（见上）。**无参数则递归整个仓库**。fenced 代码块内容原样保留 |
+| `_tool_fmt_md.py [文件...]` | 排版标准化（见上）。**无参数则递归整个仓库**，`-all` 递归整个仓库且跳过确认。fenced 代码块内容原样保留 |
 | `_tool_export_colored.py <文件...>` | 生成 `X_colored.md` 供 PDF 导出，原文件只读 |
 | `_tool_count_words.pyw` | 字数统计 CLI（用法见下）；不排除任何标记 |
 | `_tool_gen_random_int.pyw` | tkinter 随机数（空格键切本福特定律分布） |
@@ -93,7 +93,7 @@ python build.py    # 无参数、无子命令；依赖 markdown 库；产出 doc
 
 - **`_tool_clear_drafts.py` 的确认步骤被注释掉了**——无提示、不可逆、无备份地清空 `temp*.md`。而 `[TMP] Drafts/` 里可能存着真实草稿。**运行前先自己备份。**
 - `_tool_clean_backups.py` 永久删除所有 `_Original` 备份，无备份。
-- `_tool_fmt_md.py` 无参数时**原地重写当前目录下所有 `.md`**，只问一次且回车即继续；它改的不只是排版（还会全角化引号、插入空格和零宽空格）。fenced 代码块内容不受影响。
+- `_tool_fmt_md.py` 无参数时**原地重写当前目录下所有 `.md`**，只问一次且回车即继续；`-all` 连这一次也跳过，直接动手。它改的不只是排版（还会全角化引号、插入空格和零宽空格）。fenced 代码块内容不受影响。
 - `_tool_fix_chapters.py` 最规矩：先打印完整报告 → 要 `y` → 备份 `X_Original.md` → 才写回。
 
 ### `.toolignore` 机制
