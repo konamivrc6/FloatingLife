@@ -277,7 +277,7 @@ def format_markdown(text):
 
 
 def process_file(filepath):
-    """处理单个 Markdown 文件：备份 → 标准化 → 写回。"""
+    """处理单个 Markdown 文件：标准化 → 有变化才备份并写回。"""
     if not os.path.isfile(filepath):
         print(f"Error: file '{filepath}' not found. Skipping.")
         return
@@ -288,16 +288,22 @@ def process_file(filepath):
     # 放在备份之前：命中时不留下 _Original 残骸
     assert_placeholders_absent(content, filepath)
 
+    formatted = format_markdown(content)
+
+    # 逐字节比对：无变化则不建备份、不写回，免得堆出一批与原文相同的 _Original。
+    # \r 归一已在 format_markdown 开头做过，所以 CRLF 文件走的是「有变化」分支，不会漏掉。
+    if formatted == content:
+        print(f"[{filepath}] No changes, skipping.")
+        return
+
     base, ext = os.path.splitext(filepath)
     backup_path = base + "_Original" + ext
 
     shutil.copy2(filepath, backup_path)
     print(f"[{filepath}] Backup saved as: {backup_path}")
 
-    content = format_markdown(content)
-
     with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        f.write(content)
+        f.write(formatted)
 
     print(f"[{filepath}] Modification complete.")
 
