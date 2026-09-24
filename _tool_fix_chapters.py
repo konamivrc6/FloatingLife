@@ -6,7 +6,7 @@
 
 分节规则：每个 `# ` 标题视作分节符，会打断章节序列；每个分节内的章节独立编号。
 分节内起始序号规则：该分节第一个章节标题若有数字序号，则沿用该序号作起点；否则从 0 开始。
-换行符（CRLF / LF）原样保留，不做转换。
+换行符统一为 LF：读取后删除所有 \r，不做保留。
 
 ### 标题标签（仅文件名含 `_toWrite` 时启用）：
 `### 标题_标签1_标签2`。特殊标签两类：
@@ -245,6 +245,7 @@ def process_file(filepath):
 
     with open(filepath, 'r', encoding='utf-8-sig', newline='') as f:
         content = f.read()
+    content = content.replace('\r', '')   # 统一 LF
 
     lines = content.splitlines(keepends=True)
 

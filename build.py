@@ -517,7 +517,7 @@ def _home_sky_svg():
     """生成首页底部的空岛界线稿（高空俯瞰视角，可见上表面）。
 
     每座空岛 = 边缘微扭曲的类椭圆上表面 + 下方岛身（尖底或平底）。
-    用固定种子的随机扰动让每座岛形态各异。
+    用随机扰动让每座岛形态各异（不固定种子，每次构建略有差异）。
     """
     rng = random  # 不固定种子，每次构建形态略有不同
 
@@ -599,6 +599,9 @@ def _home_sky_svg():
 
 
 def build():
+    # 清空旧站点，避免已删除章节/设定的 HTML 残留
+    if DOCS.exists():
+        shutil.rmtree(DOCS)
     DOCS.mkdir(exist_ok=True)
 
     # 写出共享的 CSS 和 JS 文件
