@@ -81,13 +81,15 @@ python build.py    # 无参数、无子命令；依赖 markdown 库；产出 doc
 | `_tool_fix_chapters.py <文件...>` | 章节序号重排；文件名含 `_toWrite` 时额外做 `###` 标签规范化与排序 |
 | `_tool_fmt_md.py [文件...]` | 排版标准化（见上）。**无参数则递归整个仓库**，`-all` 递归整个仓库且跳过确认。fenced 代码块内容原样保留 |
 | `_tool_export_colored.py <文件...>` | 生成 `X_colored.md` 供 PDF 导出，原文件只读 |
-| `_tool_count_words.pyw` | 字数统计 CLI（用法见下）；不排除任何标记 |
+| `_tool_count_words.pyw` | 字数统计 CLI（用法见下）；统计前会剥掉作者注 / HTML 标签 / 标题行的 `#` 与序号 / 零宽空格 |
 | `_tool_gen_random_int.pyw` | tkinter 随机数（空格键切本福特定律分布） |
 | `_tool_strip_bom.py` | 递归去 `.txt/.py/.md` 的 UTF-8 BOM |
 | `_tool_clean_backups.py` | 删除所有 `*_Original*` 备份 |
 | `_tool_clear_drafts.py` | 清空 `temp*.md` |
 
-`_tool_count_words.pyw` 的 CLI 用法：`python _tool_count_words.pyw <文件.md>` → 打印 5 项字数（字符数 / 汉字无标点 / 汉字含标点 / 西文词数 / 标准字数），退出码 0；缺参数则打印用法、退出码 1。按 `utf-8-sig` 读文件，带 BOM 的源文件也能用。
+`_tool_count_words.pyw` 的 CLI 用法：`python _tool_count_words.pyw <文件.md>` → 打印 5 项字数（字符数 / 汉字无标点 / 汉字含标点 / 西文词数 / 含标点字数），退出码 0；缺参数则打印用法、退出码 1。按 `utf-8-sig` 读文件，带 BOM 的源文件也能用。
+
+`含标点字数` 的口径是 **汉字 + 中文标点 + 西文词数**，走字符制。**它不是官方稿酬口径**——《使用文字作品支付报酬办法》算的是版面字数（排印的版面每行字数 × 全部实有行数），与字号开本绑定，纯文本还原不出来。两者结构不同，别拿这个数直接对稿酬。西文按**词数**计（`Hello` 与 `internationalization` 同价），不按字符折算。
 
 ### ⚠️ 破坏性脚本
 

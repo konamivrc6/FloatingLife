@@ -9,13 +9,25 @@ BORDER    = "#2a2a2a"   # 边框
 TEXT_MAIN = "#b1b1b1"   # 主文字
 TEXT_DIM  = "#b1b1b1"   # 次要文字（当前与 TEXT_MAIN 同色）
 ACCENT    = "#ffffff"   # 强调（白）
-ACCENT2   = "#d6d6d6"   # 弱强调（浅灰，用于标准字数）
 INPUT_BG  = "#0a0a0a"   # 输入框背景
 CURSOR    = "#ffffff"   # 光标
 SEL_BG    = "#333333"   # 选中背景
 
 
+def strip_markup(text: str) -> str:
+    """剥掉不该计入字数的标记。
+
+    只处理四类：作者注、HTML 标签、标题行的 # 与章节序号、零宽空格。
+    `*斜体*` 的星号、表格 `|`、列表 `-` 都当正文内容保留。
+    """
+    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)          # 作者注可跨行；build.py 的 strip_comments() 也会删
+    text = re.sub(r'<[^>]+>', '', text)                        # <br/> <br> <u> </u> 等
+    text = re.sub(r'^#{1,6}\s+\d*\s*', '', text, flags=re.M)   # 标题行的 # 与章节序号，标题文字保留
+    return text.replace(chr(0x200b), '')                     # _tool_fmt_md.py 插在 * 内侧的零宽空格
+
+
 def count_stats(text: str) -> dict:
+    text          = strip_markup(text)
     no_space      = re.sub(r'\s', '', text)
     char_count    = len(no_space)
 
@@ -23,9 +35,13 @@ def count_stats(text: str) -> dict:
         r'[\u4e00-\u9fff\u3400-\u4dbf\U00020000-\U0002a6df]', text)
     hanzi_count   = len(hanzi)
 
+    # 逐个区间列举，跳过夹在里面的非标点码位：全角空格 U+3000、全角字母数字
+    # U+FF10-19/21-3A/41-5A、々〆 之类符号、〡-〩 中文数字。
+    # 早先整段收 U+FF00-FFEF，会把全角字母数字一并当成标点。
     cn_punct      = re.findall(
-        r'[\u3000-\u303f\uff00-\uffef'
-        r'\u2018\u2019\u201c\u201d\u2014\u2026\u00b7\u300a\u300b\u3008\u3009]',
+        r'[\u3001-\u3003\u3008-\u3011\u3014-\u301f'
+        r'\uff01-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff65'
+        r'\u2013\u2014\u2018\u2019\u201c\u201d\u2026\u22ef\u00b7\u30fb]',
         text)
     cn_punct_count = len(cn_punct)
 
@@ -145,7 +161,7 @@ class WordCounter(tk.Tk):
             ("hanzi",       "汉字（无标点）",  TEXT_MAIN),
             ("hanzi_punct", "汉字（含标点）",    TEXT_MAIN),
             ("en_words",    "西文词数",          TEXT_MAIN),
-            ("standard",    "标准字数",          ACCENT),
+            ("standard",    "含标点字数",        ACCENT),
         ]
 
         self._stat_vars = {}
@@ -236,7 +252,7 @@ def main():
         ("汉字（无标点）", "hanzi"),
         ("汉字（含标点）", "hanzi_punct"),
         ("西文词数",      "en_words"),
-        ("标准字数",      "standard"),
+        ("含标点字数",    "standard"),
     ]:
         print(f"{label}: {stats[key]}")
     sys.exit(0)
