@@ -98,7 +98,8 @@ def assert_placeholders_absent(text, filepath):
 
 # ── 数字与单位 ────────────────────────────────────────────────────
 
-UNIT_WHITELIST = "mal J mol m m/s J/mal g g/m³ ℃ K °F °C s min h d cal eV Wh lb oz t u Da L gal N Pa bar atm torr psi mmHg A V W Ω Hz F H T S % dB pH B bit byte Å ft in mi nmi rad deg ° M kat mol/L lm lx Bq Gy Sv C".split()
+# 裸角度符号「°」与百分号「%」不在此列：按排版惯例它们紧贴数字（30°、0.1°、50%），插空格是错的。°C / °F / ℃ 是完整单位，仍走「数字 + 空格 + 单位」的规则。
+UNIT_WHITELIST = "mal J mol m m/s J/mal g g/m³ ℃ K °F °C s min h d cal eV Wh lb oz t u Da L gal N Pa bar atm torr psi mmHg A V W Ω Hz F H T S dB pH B bit byte Å ft in mi nmi rad deg M kat mol/L lm lx Bq Gy Sv C".split()
 SI_PREFIX = r'(Y|Z|E|P|T|G|M|k|h|da|d|c|m|μ|n|p|f|a|z|y)?'
 
 
