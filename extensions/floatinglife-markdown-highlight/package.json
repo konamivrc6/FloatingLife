@@ -1,8 +1,8 @@
 {
   "name": "floatinglife-markdown-highlight",
   "displayName": "浮生 Markdown 高亮",
-  "description": "《浮生》小说的 Markdown 高亮：/* */ 注释、中文引号/书名号与 ### 标题标签。",
-  "version": "0.2.0",
+  "description": "《浮生》小说的 Markdown 高亮：/* */ 注释、中文引号/书名号、### 标题标签，以及最近 7 秒输入的文字。",
+  "version": "0.3.0",
   "publisher": "local",
   "engines": {
     "vscode": "^1.70.0"
