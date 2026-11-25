@@ -100,7 +100,7 @@ python build.py    # 无参数、无子命令；依赖 markdown 库；产出 doc
 
 ### `.toolignore` 机制
 
-`_lib/toolignore.py` + `.toolignore` 决定"这批工具该不该处理某个文件"，按 basename 做 glob，防止误加工派生物：`*_Original*`、`*_colored*`、`*_LLM*`、`*Clipboard*`、`temp*`、`README.md`。`build.py` 也读它。它与 `.gitignore` 是两套并行的规则。
+`_lib/toolignore.py` + `.toolignore` 决定"这批工具该不该处理某个文件"，按 basename 做 glob，防止误加工派生物：`*_Original*`、`*_colored*`、`*_LLM*`、`*Clipboard*`、`temp*`。`build.py` 也读它。它与 `.gitignore` 是两套并行的规则。
 
 ### 必须同步的三处
 
