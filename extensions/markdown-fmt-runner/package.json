@@ -1,0 +1,52 @@
+{
+  "name": "markdown-fmt-runner",
+  "displayName": "Markdown 排版触发器",
+  "description": "在 Markdown 里敲 ///fmt 再回车，调用 _tool_fmt_md.py 排版当前文件。",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./main.js",
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onCommand:markdownFmt.formatFile"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "markdownFmt.formatFile",
+        "title": "排版当前 Markdown 文件",
+        "category": "Markdown"
+      }
+    ],
+    "configuration": {
+      "title": "Markdown 排版",
+      "properties": {
+        "markdownFmt.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "敲触发器（默认 ///fmt）时自动排版。命令面板里的「Markdown: 排版当前 Markdown 文件」不受此项影响。"
+        },
+        "markdownFmt.trigger": {
+          "type": "string",
+          "default": "///fmt",
+          "description": "触发词。在 Markdown 中敲出它、紧接着按回车才会触发；触发词和这次回车都会被删掉。写在 fenced 代码块里不触发。"
+        },
+        "markdownFmt.scriptPath": {
+          "type": "string",
+          "default": "_tool_fmt_md.py",
+          "description": "排版脚本的位置。相对路径按当前文件所在的工作区根目录解析（没开工作区时从文件所在目录逐级向上找）；也可以填绝对路径。"
+        },
+        "markdownFmt.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python 解释器。默认走 PATH 上的 python；注意本机 python3 是应用商店占位程序，不要改成 python3。"
+        }
+      }
+    }
+  }
+}
